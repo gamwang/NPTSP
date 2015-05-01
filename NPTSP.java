@@ -12,7 +12,7 @@ class NPTSP {
           String[] tmp = row.split(" ");
           adjMat[i] = new int[len];
           for (int j = 0; j < len; j += 1) {
-            adjMat[i][j] = Integer.parseInt(tmp[0]);
+            adjMat[i][j] = Integer.parseInt(tmp[j]);
           }
         }
         String[] colorMat = sc.nextLine().split(" ");
@@ -20,6 +20,6 @@ class NPTSP {
     }
     
     static void solve(int[][] adjMat, String[] colorMat) {
-      // Solve the TSP and print it out to STDOUT
+       /* Solve the TSP and print it out to STDOUT */
     }
 }
