@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+    echo "Usage: generate NUM [NUMVER], NUM = number graphs to generate. trash."
+    exit
+fi
+
+i="0"
+NUM=$1
+FILES=~/tsp/graphs/*
+if [ ! -z $2 ]; then
+    NUMVER=$2
+else
+    NUMVER=""
+fi
+while [ $i -lt $NUM ]; do
+    if [ -z NUMVER ]; then
+        new_file="$(python genRandGraph.py 1)"
+    else
+        new_file="$(python genRandGraph.py 1 $NUMVER)"
+    fi
+    temp="$(cd graphs; ls -l | wc -l;)"
+    if [ $temp -eq "0" ]; then
+        mv $new_file graphs
+        echo $new_file
+        i=$[$i+1]
+        continue
+    fi
+    for f in $FILES; do
+        if diff $new_file $f > /dev/null ; then
+            rm $new_file
+            break
+        fi
+    done
+    if [ -a $new_file ]; then
+        mv $new_file graphs
+        echo $new_file
+        i=$[$i+1]
+    fi
+done
