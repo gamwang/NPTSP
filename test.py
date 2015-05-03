@@ -17,18 +17,16 @@ def greedyAlgorithm(graph):
                     if smallest > dist:
                         smallest = dist
                         nextNode = node
-            if count > 3:
-                return -1
-            elif color == graph.colors[nextNode]:
-                count += 1
-            else:
-                color = graph.colors[nextNode]
-                count = 1
+#            if count > 3:
+#                return -1
+#            elif color == graph.colors[nextNode]:
+#                count += 1
+#            else:
+#                color = graph.colors[nextNode]
+#                count = 1
             cost += graph.edges[curr][nextNode]
             curr = nextNode
             visited.append(curr)
-        print cost
-        print visited
         if bestCost > cost:
             bestCost = cost
             bestPath = visited
@@ -37,7 +35,7 @@ def greedyAlgorithm(graph):
 
 T = 1 # number of test cases
 #fout = open ("answer.out", "w")
-for t in xrange(1, T+1):
+for t in xrange(7, 8):
     fin = open(str(t) + ".in", "r")
     N = int(fin.readline())
     d = [[] for i in range(N)]
@@ -48,7 +46,11 @@ for t in xrange(1, T+1):
     graph = util.Graph(N, d, c)
     
     result = greedyAlgorithm(graph)
-    print result
+    print "Length:"
+    print result[0]
+    print "Path:"
+    for x in range(len(result[1])):
+        print (result[1][x], graph.colors[result[1][x]])
 
     
     # find an answer, and put into assign

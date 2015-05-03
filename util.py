@@ -12,3 +12,21 @@ class Graph(object):
         
     def findNode(self, n):
         return (self.colors[n], self.edges[n])
+
+    def smallestBlueEdge(self, n1):
+        dist = 1000
+        for v in range(len(self.edges[n1])):
+            if v != n1 and self.colors[v] == "B":
+                if dist > self.edges[n1][v]:
+                    dist = self.edges[n1][v]
+                    blueEdge = (n1, v, dist)
+        return blueEdge
+    
+    def smallestRedEdge(self, n1):
+        dist = 1000
+        for v in range(len(self.edges[n1])):
+            if v != n1 and self.colors[v] == "R":
+                if dist > self.edges[n1][v]:
+                    dist = self.edges[n1][v]
+                    redEdge = (n1, v, dist)
+        return redEdge

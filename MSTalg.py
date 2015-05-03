@@ -72,7 +72,7 @@ def createPath(graph, edges):
 
 T = 1 # number of test cases
 #fout = open ("answer.out", "w")
-for t in xrange(6, 9):
+for t in xrange(8, 9):
     fin = open(str(t) + ".in", "r")
     N = int(fin.readline())
     d = [[] for i in range(N)]
