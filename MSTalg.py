@@ -87,7 +87,7 @@ for t in xrange(1, 2):
     graph = util.Graph(N, d, c)
 
     result = MSTalg(graph)
-    result = createPath(graph, edges)
+    result = createPath(graph, result)
     print "Edges:"
     stuff = sorted(edges, key=lambda x: x[1])
     for x in range(len(stuff)):
