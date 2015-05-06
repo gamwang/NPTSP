@@ -71,37 +71,40 @@ def createPath(graph, edges):
     visited.append(v)
     path.append((v, graph.colors[v]))
     return path
-						
-						
-T = 1 # number of test cases
-#fout = open ("answer.out", "w")
-for t in xrange(1, 2):
-    fin = open("JonIsTrash" + str(t) + ".in", "r")
-    N = int(fin.readline())
-    d = [[] for i in range(N)]
-    for i in xrange(N):
-        d[i] = [int(x) for x in fin.readline().split()]
-    c = fin.readline()
+				
+if __name__ == "__main__":
+    T = 1 # number of test cases
+    #fout = open ("answer.out", "w")
+    for t in xrange(1, 2):
+        fin = open("JonIsTrash" + str(t) + ".in", "r")
+        N = int(fin.readline())
+        d = [[] for i in range(N)]
+        for i in xrange(N):
+            d[i] = [int(x) for x in fin.readline().split()]
+        c = fin.readline()
 
-    graph = util.Graph(N, d, c)
+        graph = util.Graph(N, d, c)
 
-    result = MSTalg(graph)
-    result = createPath(graph, result)
-    print "Result:"
-    length = 0
-    prev = -1
-    for x in range(len(result)):
-        if prev >= 0:
-            length += graph.edges[prev][result[x][0]]
-        prev = result[x][0]
-        print result[x]
-    print "Length: " + str(length)
+        result = MSTalg(graph)
+        result = createPath(graph, result)
+        print "Edges:"
+        stuff = sorted(edges, key=lambda x: x[1])
+        for x in range(len(stuff)):
+            print stuff[x]
+        print "Result:"
+        length = 0
+        prev = -1
+        for x in range(len(result)):
+            if prev >= 0:
+                length += graph.edges[prev][result[x][0]]
+            prev = result[x][0]
+            print result[x]
+        print "Length: " + str(length)
 
-
-    # find an answer, and put into assign
-#    assign = [0] * N
-#    for i in xrange(N):
-#        assign[i] = i+1
-#
-#    fout.write("%s\n" % " ".join(map(str, assign)))
-#fout.close()
+        # find an answer, and put into assign
+    #    assign = [0] * N
+    #    for i in xrange(N):
+    #        assign[i] = i+1
+    #
+    #    fout.write("%s\n" % " ".join(map(str, assign)))
+    #fout.close()
