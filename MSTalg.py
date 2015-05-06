@@ -42,6 +42,10 @@ def MSTalg(graph):
     return minimum_spanning_tree
 
 def createPath(graph, edges):
+    edges = sorted(list(result), key=lambda x: x[1])
+    length = len(edges)
+    for e in range(length):
+        edges.append((edges[e][0], edges[e][2], edges[e][1], edges[e][3]))
 		visited = []
 		path = []
 		
@@ -72,8 +76,8 @@ def createPath(graph, edges):
 
 T = 1 # number of test cases
 #fout = open ("answer.out", "w")
-for t in xrange(8, 9):
-    fin = open(str(t) + ".in", "r")
+for t in xrange(1, 2):
+    fin = open("JonIsTrash" + str(t) + ".in", "r")
     N = int(fin.readline())
     d = [[] for i in range(N)]
     for i in xrange(N):
@@ -83,10 +87,6 @@ for t in xrange(8, 9):
     graph = util.Graph(N, d, c)
 
     result = MSTalg(graph)
-    edges = sorted(list(result), key=lambda x: x[1])
-    length = len(edges)
-    for e in range(length):
-        edges.append((edges[e][0], edges[e][2], edges[e][1], edges[e][3]))
     result = createPath(graph, edges)
     print "Edges:"
     stuff = sorted(edges, key=lambda x: x[1])
