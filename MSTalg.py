@@ -46,17 +46,17 @@ def createPath(graph, edges):
     length = len(edges)
     for e in range(length):
         edges.append((edges[e][0], edges[e][2], edges[e][1], edges[e][3]))
-		visited = []
-		path = []
+    visited = []
+    path = []
 		
-		stack = []
-		for e in range(len(edges)):
+    stack = []
+    for e in range(len(edges)):
 				if (edges[e][1] == 0 or edges[e][2] == 0):
 						stack.append(edges[e])
-		visited = [0]
-		path = [(0, graph.colors[0])]
+    visited = [0]
+    path = [(0, graph.colors[0])]
 		
-		while len(stack) > 0:
+    while len(stack) > 0:
 				edge = stack.pop()
 				if edge[1] in visited and edge[2] in visited:
 						continue
@@ -69,7 +69,7 @@ def createPath(graph, edges):
 								stack.append(edges[e])
 				visited.append(v)
 				path.append((v, graph.colors[v]))
-		return path
+    return path
 						
 						
 				
