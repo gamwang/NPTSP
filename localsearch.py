@@ -20,7 +20,7 @@ def createRandomPath(graph):
             currCity = nextEdge
             notVisited.remove(currCity)
     last = edges[graph.numCities - 2][1]
-    edges.append((last, start, graph.edges[currCity][nextEdge], graph.colors[last], graph.colors[start]))
+    edges.append((last, start, graph.edges[start][last], graph.colors[last], graph.colors[start]))
     return edges
 
 def testRandom(graph, edges):
@@ -127,13 +127,35 @@ def localSearch2(graph, edges):
             length = newLength
             count += 1
             x += 1
-    return (edges, length)
+    highest = 0
+    edge = 0
+    for e in edges:
+        if e[2] > highest:
+            highest = e[2]
+            edge = e
+    edges.remove(edge)
+    length -= highest
+    
+    curr = edge[0]
+    path = [curr]
+    while len(path) < graph.numCities:
+        for e in edges:
+            if e[0] == curr or e[1] == curr:
+                nextEdge = e
+                break
+        if e[0] == curr:
+            curr = e[1]
+        else:
+            curr = e[0]
+        path.append(curr)
+        edges.remove(nextEdge)
+    return path, length
 
 
 
 T = 1 # number of test cases
 #fout = open ("answer.out", "w")
-for t in xrange(1, 496):
+for t in xrange(58, 59):
     fin = open("instances/" + str(t) + ".in", "r")
     N = int(fin.readline())
     d = [[] for i in range(N)]
@@ -152,9 +174,9 @@ for t in xrange(1, 496):
 
     edges, length = localSearch2(graph, result)
     
-    if not checkPath(graph, edges):
-        print 'color wrong'
-        break
+#    if not checkPath(graph, edges):
+#        print 'color wrong'
+#        break
     
     print "Found path: "
     print edges
