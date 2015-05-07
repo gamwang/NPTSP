@@ -63,7 +63,8 @@ def solveTSP(graph, N, debug = False):
             opt_result = result_out  
     if opt_result == None:
         return opt_result
-    out = map(lambda x: x[0], opt_result)
+    out = map(lambda x: x[0] + 1, opt_result)
+    
     if debug:
         print "Number of nodes: %d" % N
         print "Number of nodes in path: %d" % len(out)
