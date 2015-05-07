@@ -369,14 +369,84 @@ def calcLength(result):
       prev = result[x][0]
   return length
 
-def processCase(c, perm, d):
+def MSTGreedy(graph, start):
+    #preprocess
+    visited = [start]
+    path = [(start, graph.colors[start])]
+    tmp = []
+    for i, e in enumerate(graph.edges[start]):
+        if i not in visited:
+            tmp.append([e, start, i, graph.colors[i]])
+    tmp = sorted(tmp, key=lambda x: x[0])
+    tmp.reverse() 
+    stack = []
+    for item in tmp:
+      stack.append(item)
+    # Greedily find a path
+    while len(stack) > 0:
+        edge = stack.pop()
+        if edge[1] in visited and edge[2] in visited and not isEdge(path, edge):
+            continue
+        if edge[1] not in visited:
+            v = edge[1]
+            u = edge[2]
+        else:
+            v = edge[2]
+            u = edge[1]
+        inserted = False
+        # Choose whether the edge is for head or tail of the path
+        flg = u == path[-1][0]
+        if flg and not util.backColor(graph, path, v): 
+            visited.append(v)
+            path.append((v, graph.colors[v])) 
+            inserted = True
+        if not flg and not util.frontColor(graph, path, v) and not inserted: 
+            visited.append(v)
+            path.insert(0, (v, graph.colors[v])) 
+            inserted = True
+        if inserted:
+            tmp = []
+            for i, e in enumerate(graph.edges[path[-1][0]]):
+                if i not in visited:
+                    tmp.append([e, path[-1][0], i, graph.colors[i]])
+            for i, e in enumerate(graph.edges[path[0][0]]):
+                if i not in visited:
+                    tmp.append([e, path[0][0], i, graph.colors[i]])
+            tmp = sorted(tmp, key=lambda x: x[0])
+            tmp.reverse() 
+            stack = []
+            for item in tmp:
+              stack.append(item)
+    return path
+def solveTSP(graph, N, debug = False):
+    opt_result = None
+    opt_length = sys.maxint
+    for i in range(N):
+        result_out = MSTGreedy(graph, i) 
+        # cost
+        length = util.getCost(graph, result_out)
+        if opt_length > length and len(result_out) == N:
+            opt_length = length
+            opt_result = result_out  
+    if opt_result == None:
+        return opt_result
+    out = map(lambda x: x[0], opt_result)
+    if debug:
+        print "Number of nodes: %d" % N
+        print "Number of nodes in path: %d" % len(out)
+        print "Cost: ", opt_length  
+        print "Result: ", opt_result
+    return out
+
+def processCase(c, perm, di, name):
   # check it's valid
   v = [0] * N
   prev = 'X'
   count = 0
   for i in xrange(N):
     if v[perm[i]-1] == 1:
-      print "Your answer must be a permutation of {1,...,N}."
+      if name != "Random":
+        print name + " Your answer must be a permutation of {1,...,N}."
       return -1
     v[perm[i]-1] = 1
 
@@ -388,7 +458,8 @@ def processCase(c, perm, d):
       count = 1
 
     if count > 3:
-      print "Your tour cannot visit more than 3 same colored cities consecutively."
+      if name != "Random":
+        print name + " Your tour cannot visit more than 3 same colored cities consecutively."
       return -1
 
   cost = 0
@@ -399,10 +470,16 @@ def processCase(c, perm, d):
 
   return cost
 
+def genRandom(c, d):
+    x = [i + 1 for i in range(N)]
+    random.shuffle(x)
+    while processCase(c, x, d, "Random") == -1:
+        random.shuffle(x)
+    return x
 
 if __name__ == "__main__":
     T = 495 # number of test cases
-    fout = open ("answer.out", "w")
+    fout = open ("answer1.out", "w")
     for t in xrange(1, T+1):
         fin = open("instances/"+str(t) + ".in", "r")
         N = int(fin.readline())
@@ -412,48 +489,61 @@ if __name__ == "__main__":
         c = fin.readline()
 
         graph = util.Graph(N, d, c)
-
+        print "Input " + str(t)
         if N <= 10:
+          #Brute Force
           result = findPath()
           result = createPath(result)
           sol = []
-          for i in range(len(resultMST)):
+          for i in range(len(result)):
             sol.append(result[i][0]+1)
-          l = processCase(c,sol,d)
+          l = processCase(c,sol,d,"brute force")
           for k in range(len(result)):
             fout.write("{0} ".format(str(sol[k])))
             if k == N -1:
               fout.write("{0}\n".format(str(sol[k])))
 
-          print "bruteforce " + str(N) + " " + str(l)
+          print ">>>>>>>>>>>>>> Bruteforce " + str(N) + " " + str(l)
           print "Path: " + str(sol)
         else:
+          #Random
+          resultRand = genRandom(c, d)
+          lengthRand = processCase(c,resultRand,d, "Rand")
+
+          #MST
           resultMST = MSTalg(graph)
           resultMST = createPathMST(graph, resultMST)
           sol = []
           for i in range(len(resultMST)):
             sol.append(resultMST[i][0]+1)
-          lengthMST = processCase(c,sol,d)
-          resultLocal = createRandomPath(graph)
-          pathLocal, lengthLocal = localSearch2(graph, resultLocal)
-          lengthLocal = processCase(c,pathLocal,d)
-          if lengthLocal == -1 and lengthMST == -1:
-            fout.write("No solution lol oops\n")
-            continue
-          if lengthLocal == -1 or lengthMST < lengthLocal:
-            print "MST " + str(N) + " " + str(lengthMST)
+          lengthMST = processCase(c,sol,d, "MST")
+
+          #Greedy
+          resultGreedy = solveTSP(graph, N)
+          if resultGreedy == None:
+            lengthGreedy = -1
+          else:
+            lengthGreedy = processCase(c,resultGreedy,d, "Greedy")
+
+          if lengthGreedy == -1 and lengthMST == -1:
+            print "Nothing works so GENERATING RANDOM YOLO"
+            result = resultRand
+          elif lengthGreedy == -1 or (lengthMST < lengthGreedy and 
+                                                    lengthMST < lengthRand):
+            print ">>>>>>>>>>>>>>>> MST " + str(N) + " " + str(lengthMST)
             print "Path: " + str(sol)
             result = sol
-          elif lengthLocal != -1:
-            result = pathLocal
-            print "localSearch " + str(N) + " " + str(lengthLocal)
-            print "Path: " + str(pathLocal)
+          elif lengthGreedy != -1 and lengthGreedy < lengthRand:
+            result = resultGreedy
+            print ">>>>>>>>>>>>>>>> Greedy " + str(N) + " " + str(lengthGreedy)
+            print "Path: " + str(resultGreedy)
           else:
-            print "ERROR, no solution?"
-            fout.write("no solutionnn!!! wrong\n")
-            continue
+            print ">>>>>>>>>>>>>>>> Random it is"
+            result = resultRand
           for k in range(len(result)):
             fout.write("{0} ".format(str(result[k])))
             if k == N -1:
               fout.write("{0}\n".format(str(result[k])))
     fout.close()
+
+
