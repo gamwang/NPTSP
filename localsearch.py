@@ -23,30 +23,14 @@ def createRandomPath(graph):
     edges.append((last, start, graph.edges[start][last], graph.colors[last], graph.colors[start]))
     return edges
 
-def testRandom(graph, edges):
-    visited = []
-    color = "a"
-    count = 0
-    for e in edges:
-        if e[0] in visited:
-            return False
-        else:
-            if color == graph.colors[e[0]] and count == 3:
-                return False
-            elif color == graph.colors[e[0]]:
-                count += 1
-            else:
-                count = 1
-                color = graph.colors[e[0]]
-            visited.append(e[0])
-    return True
-
 def checkPath(graph, edges):  
     temp = list(edges)
     curr = temp[0][0]
+    start = curr
     color = graph.colors[curr]
-    colorCities = [(curr, color)]
     count = 1
+    lap = 0
+    x = 0
     while len(temp) > 0:
         nextEdge = -1
         for e in temp:
@@ -57,21 +41,21 @@ def checkPath(graph, edges):
             return False
         elif nextEdge[0] == curr:
             curr = nextEdge[1]
-            temp.remove(nextEdge)
-        else:
+        elif nextEdge[1] == curr:
             curr = nextEdge[0]
+        if x < graph.numCities:
+            x += 1
+        else:
+            lap = 1
+        if lap == 1:
             temp.remove(nextEdge)
-            
-        if color == graph.colors[curr] and count == 3:
+        if color == graph.colors[curr] and count >= 3:
             return False
         elif color == graph.colors[curr]:
-            colorCities.append((curr, color))
             count += 1
         else:
             color = graph.colors[curr]
-            colorCities = [(curr, color)]
             count = 1
-            
     return True
 
 def switch2Edges(graph, edges, length):
@@ -127,10 +111,14 @@ def localSearch2(graph, edges):
             length = newLength
             count += 1
             x += 1
+    
+    if not checkPath(graph, newPath):
+        print "error in path edges line 108"
+    thing = list(edges)
     highest = 0
     edge = 0
     for e in edges:
-        if e[2] > highest:
+        if e[2] >= highest:
             highest = e[2]
             edge = e
     edges.remove(edge)
@@ -149,13 +137,31 @@ def localSearch2(graph, edges):
             curr = e[0]
         path.append(curr)
         edges.remove(nextEdge)
-    return path, length
+    return path, length, thing
 
-
+def checkVertices(graph, path):
+    color = 'a'
+    count = 0
+    seen = []
+    for v in path:
+        if v in seen:
+            return False
+        else:
+            seen.append(v)
+        #print str(v) + ", color: " + str(graph.colors[v])
+        if color != graph.colors[v]:
+            color = graph.colors[v]
+            count = 1
+        elif color == graph.colors[v] and count == 3:
+            return False
+        elif color == graph.colors[v]:
+            count += 1
+    return True
+    
 
 T = 1 # number of test cases
-#fout = open ("answer.out", "w")
-for t in xrange(4, 5):
+fout = open ("answer2.out", "w")
+for t in xrange(240, 496):
     fin = open("instances/" + str(t) + ".in", "r")
     N = int(fin.readline())
     d = [[] for i in range(N)]
@@ -171,32 +177,33 @@ for t in xrange(4, 5):
     result = createRandomPath(graph)
     
 #Test random path
-    #print "Random: " + str(checkPath(graph, result))
+    print "Random: " + str(checkPath(graph, result))
 
-    edges, length = localSearch2(graph, result)
+    path, length, newPath = localSearch2(graph, result)
+    print "Found path"
     
-#    if not checkPath(graph, edges):
-#        print 'color wrong'
-#        break
-
-    if len(set(edges)) != len(edges):
-        print "duplicates"
+    print "Checking validity of path..."
+    if not checkVertices(graph, path):
+        print "invalid path"
+        print path
         break
+    else:
+        print "clear"
     
-    print "Found path: "
-    print edges
+    print "Path: "
+    print path
     print "With length " + str(length)
     print "_________________________________________"
     
-    if len(edges) != N:
+    if len(path) != N:
         print 'length wrong'
         break
     
     
 # find an answer, and put into assign
-#    assign = [0] * N
-#    for i in xrange(N):
-#        assign[i] = i+1
-#
-#    fout.write("%s\n" % " ".join(map(str, assign)))
-#fout.close()
+    assign = [0] * N
+    for i in xrange(N):
+        assign[i] = path[i] + 1
+
+    fout.write("%s\n" % " ".join(map(str, assign)))
+fout.close()
