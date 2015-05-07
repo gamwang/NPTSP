@@ -95,7 +95,7 @@ if __name__ == "__main__":
     T = 1 # number of test cases
     #fout = open ("answer.out", "w")
     for t in xrange(1, 2):
-        fin = open("instances/231" + ".in", "r")
+        fin = open("instances/58" + ".in", "r")
         N = int(fin.readline())
         d = [[] for i in range(N)]
         for i in xrange(N):
@@ -106,15 +106,19 @@ if __name__ == "__main__":
 
         result = findPath()
         result = createPath(result)
-        print "Result:"
-        length = 0
-        prev = -1
-        for x in range(len(result)):
-            if prev >= 0:
-                length += graph.edges[prev][result[x][0]]
-            prev = result[x][0]
-            print result[x]
-        print "Length: " + str(length)
+        for k in range(len(result)):
+            print result[k][0] + 1,
+            if k != N - 1:
+                print " ",
+       ## print "Result:"
+       ## length = 0
+       ## prev = -1
+       ## for x in range(len(result)):
+       ##     if prev >= 0:
+       ##         length += graph.edges[prev][result[x][0]]
+       ##     prev = result[x][0]
+       ##     print result[x]
+       ## print "Length: " + str(length)
 
         # find an answer, and put into assign
     #    assign = [0] * N

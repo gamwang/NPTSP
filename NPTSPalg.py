@@ -370,14 +370,14 @@ def calcLength(result):
   return length
 
 def processCase(c, perm, d):
-
   # check it's valid
   v = [0] * N
   prev = 'X'
   count = 0
   for i in xrange(N):
     if v[perm[i]-1] == 1:
-      return "Your answer must be a permutation of {1,...,N}."
+      print "Your answer must be a permutation of {1,...,N}."
+      return -1
     v[perm[i]-1] = 1
 
     cur = c[perm[i]-1]
@@ -388,13 +388,13 @@ def processCase(c, perm, d):
       count = 1
 
     if count > 3:
-      return "Your tour cannot visit more than 3 same colored cities consecutively."
+      print "Your tour cannot visit more than 3 same colored cities consecutively."
+      return -1
 
   cost = 0
   for i in xrange(N-1):
     cur = perm[i]-1
     next = perm[i+1]-1
-
     cost += d[cur][next]
 
   return cost
@@ -414,7 +414,7 @@ if __name__ == "__main__":
         graph = util.Graph(N, d, c)
 
         if N <= 10:
-          result = findPath(graph)
+          result = findPath()
           result = createPath(result)
           sol = []
           for i in range(len(resultMST)):
@@ -434,19 +434,26 @@ if __name__ == "__main__":
           for i in range(len(resultMST)):
             sol.append(resultMST[i][0]+1)
           lengthMST = processCase(c,sol,d)
-          print "lengthMST " + str(lengthMST)
           resultLocal = createRandomPath(graph)
           pathLocal, lengthLocal = localSearch2(graph, resultLocal)
           lengthLocal = processCase(c,pathLocal,d)
-          if lengthMST > lengthLocal:
+          if lengthLocal == -1 and lengthMST == -1:
+            fout.write("No solution lol oops\n")
+            continue
+          if lengthLocal == -1 or lengthMST < lengthLocal:
             print "MST " + str(N) + " " + str(lengthMST)
             print "Path: " + str(sol)
             result = sol
-          else:
+          elif lengthLocal != -1:
             result = pathLocal
             print "localSearch " + str(N) + " " + str(lengthLocal)
             print "Path: " + str(pathLocal)
+          else:
+            print "ERROR, no solution?"
+            fout.write("no solutionnn!!! wrong\n")
+            continue
           for k in range(len(result)):
             fout.write("{0} ".format(str(result[k])))
             if k == N -1:
               fout.write("{0}\n".format(str(result[k])))
+    fout.close()
