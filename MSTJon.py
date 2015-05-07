@@ -41,82 +41,55 @@ def MSTalg(graph):
             minimum_spanning_tree.add(edge)
     return minimum_spanning_tree
 
-def createPath(graph, edges, start):
-    edges = sorted(list(edges), key = lambda x: x[1])
-    length = len(edges)
-    for e in range(length):
-        edges.append((edges[e][0], edges[e][2], edges[e][1], edges[e][3]))
-    visited = []
-    path = []
-    stack = []
-    for e in range(len(edges)):
-        if (edges[e][1] == 0 or edges[e][2] == 0):
-            stack.append(edges[e])
+def createPath(graph, start):
+    #preprocess
     visited = [start]
     path = [(start, graph.colors[start])]
-    same = 0
+    tmp = []
+    for i, e in enumerate(graph.edges[start]):
+        if i not in visited:
+            tmp.append([e, start, i, graph.colors[i]])
+    tmp = sorted(tmp, key=lambda x: x[0])
+    tmp.reverse() 
+    stack = []
+    for item in tmp:
+      stack.append(item)
+    # Greedily find a path
     while len(stack) > 0:
         edge = stack.pop()
-        if edge[1] in visited and edge[2] in visited:
+        if edge[1] in visited and edge[2] in visited and not isEdge(path, edge):
             continue
         if edge[1] not in visited:
             v = edge[1]
-        elif edge[2] not in visited:
-            v = edge[2]
-        # Keep track of color
-        if (path[-1][1] == graph.colors[v]):
-            same += 1
+            u = edge[2]
         else:
-            same = 0
-        if same > 2:
-            same -= 1
-        else:    
+            v = edge[2]
+            u = edge[1]
+        inserted = False
+        # Choose whether the edge is for head or tail of the path
+        flg = u == path[-1][0]
+        if flg and not util.backColor(graph, path, v): 
             visited.append(v)
             path.append((v, graph.colors[v])) 
-            i = 0
+            inserted = True
+        if not flg and not util.frontColor(graph, path, v) and not inserted: 
+            visited.append(v)
+            path.insert(0, (v, graph.colors[v])) 
+            inserted = True
+        if inserted:
+            #print "path: ", path
             tmp = []
-            for e in graph.edges[v]:
-                tmp.append([e,v, i, graph.colors[i]])
-                i += 1
+            for i, e in enumerate(graph.edges[path[-1][0]]):
+                if i not in visited:
+                    tmp.append([e, path[-1][0], i, graph.colors[i]])
+            for i, e in enumerate(graph.edges[path[0][0]]):
+                if i not in visited:
+                    tmp.append([e, path[0][0], i, graph.colors[i]])
             tmp = sorted(tmp, key=lambda x: x[0])
-            tmp.reverse()
+            tmp.reverse() 
+            stack = []
             for item in tmp:
               stack.append(item)
+            #print "stack: ", stack
     return path
-    		
-if __name__ == "__main__":
-    T = 1 # number of test cases
-    #fout = open ("answer.out", "w")
-    for t in xrange(1, 2):
-        fin = open("JonIsTrash" + str(t) + ".in", "r")
-        N = int(fin.readline())
-        d = [[] for i in range(N)]
-        for i in xrange(N):
-            d[i] = [int(x) for x in fin.readline().split()]
-        c = fin.readline()
 
-        graph = util.Graph(N, d, c)
-
-        result = MSTalg(graph)
-        result = createPath(graph, result)
-        print "Edges:"
-        stuff = sorted(edges, key=lambda x: x[1])
-        for x in range(len(stuff)):
-            print stuff[x]
-        print "Result:"
-        length = 0
-        prev = -1
-        for x in range(len(result)):
-            if prev >= 0:
-                length += graph.edges[prev][result[x][0]]
-            prev = result[x][0]
-            print result[x]
-        print "Length: " + str(length)
-
-        # find an answer, and put into assign
-    #    assign = [0] * N
-    #    for i in xrange(N):
-    #        assign[i] = i+1
-    #
-    #    fout.write("%s\n" % " ".join(map(str, assign)))
-    #fout.close()

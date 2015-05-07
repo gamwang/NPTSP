@@ -1,14 +1,15 @@
 from util import *
 from MSTJon import *
+import sys
 
 
 if __name__ == "__main__":
   T = 1 # number of test cases
   #fout = open ("answer.out", "w")
-  for t in xrange(1, 4):
-      print "#################", t, "###################"
-      fin = open("inputs/JonIsTrash" + str(t) + ".in", "r")
-      #fin = open("inputs/test_6" + ".in", "r")
+  failed = 0
+  for t in xrange(2, 495):
+      print "#################", t, ".in###################"
+      fin = open("instances/" + str(t) + ".in", "r")
       N = int(fin.readline())
       d = [[] for i in range(N)]
       for i in xrange(N):
@@ -16,31 +17,22 @@ if __name__ == "__main__":
       c = fin.readline()
 
       graph = util.Graph(N, d, c)
-      result = MSTalg(graph)
       opt_result = None
       opt_length = 100000000
-      for i in range(50):
+      for i in range(N):
         #print "%d'th trial" % i
-        result_out = createPath(graph, result, i)
-        length = 0
-        prev = -1
-        for x in range(len(result_out)):
-            if prev >= 0:
-                length += graph.edges[prev][result_out[x][0]]
-            prev = result_out[x][0]
-        #print length
+        result_out = createPath(graph, i) 
+        # Checking if color is correct
+        #print "Is color all good? ", checkPath(graph, result_out)
+        # cost
+        length = getCost(graph, result_out)
         if opt_length > length:
             opt_length = length
-            opt_result = result_out
-      print opt_length  
-      print opt_result
-      #print "Result:"
-      #length = 0
-      #prev = -1
-      #for x in range(len(result)):
-          #if prev >= 0:
-              #length += graph.edges[prev][result[x][0]]
-          #print graph.edges[prev][result[x][0]]
-          #prev = result[x][0]
-          #print result[x]
-      #print "Length: ", str(length)
+            opt_result = result_out 
+      print "Number of nodes: %d" % N
+      print "Number of nodes in path: %d" % len(result_out)
+      if N != len(result_out):
+          failed += 1
+      print "# failed: ", failed
+      print "Cost: ", opt_length  
+      print "Result: ", opt_result 
