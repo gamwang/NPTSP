@@ -1,6 +1,5 @@
 import util
-from collections
-import deque
+from collections import deque
 
 parent = dict()
 rank = dict()
