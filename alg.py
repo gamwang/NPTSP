@@ -17,22 +17,5 @@ if __name__ == "__main__":
       c = fin.readline()
 
       graph = util.Graph(N, d, c)
-      opt_result = None
-      opt_length = 100000000
-      for i in range(N):
-        #print "%d'th trial" % i
-        result_out = createPath(graph, i) 
-        # Checking if color is correct
-        #print "Is color all good? ", checkPath(graph, result_out)
-        # cost
-        length = getCost(graph, result_out)
-        if opt_length > length:
-            opt_length = length
-            opt_result = result_out 
-      print "Number of nodes: %d" % N
-      print "Number of nodes in path: %d" % len(result_out)
-      if N != len(result_out):
-          failed += 1
-      print "# failed: ", failed
-      print "Cost: ", opt_length  
-      print "Result: ", opt_result 
+      out = solveTSP(graph, N)
+      print out

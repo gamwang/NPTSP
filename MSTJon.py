@@ -92,4 +92,23 @@ def createPath(graph, start):
               stack.append(item)
             #print "stack: ", stack
     return path
-
+def solveTSP(graph, N, debug = False):
+    opt_result = None
+    opt_length = 100000000
+    for i in range(N):
+        result_out = createPath(graph, i) 
+        # cost
+        length = util.getCost(graph, result_out)
+        if opt_length > length:
+            opt_length = length
+            opt_result = result_out  
+    if debug:
+        print "Number of nodes: %d" % N
+        print "Number of nodes in path: %d" % len(result_out)
+        print "Cost: ", opt_length  
+        print "Result: ", opt_result
+    out = map(lambda x: x[0], opt_result)
+    if len(out) != N:
+        return None
+    else:
+        return out
