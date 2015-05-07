@@ -1,45 +1,6 @@
 import util
 from collections import deque
-
-parent = dict()
-rank = dict()
-
-def make_set(vertice):
-    parent[vertice] = vertice
-    rank[vertice] = 0
-
-def find(vertice):
-    if parent[vertice] != vertice:
-        parent[vertice] = find(parent[vertice])
-    return parent[vertice]
-
-def union(vertice1, vertice2):
-    root1 = find(vertice1)
-    root2 = find(vertice2)
-    if root1 != root2:
-        if rank[root1] > rank[root2]:
-            parent[root2] = root1
-        else:
-            parent[root1] = root2
-            if rank[root1] == rank[root2]: rank[root2] += 1
-
-def MSTalg(graph):
-    edges = []
-    visited = []
-    for i in range(graph.numCities):
-        make_set(i)
-        visited.append(i)
-        for node, dist in enumerate(graph.edges[i]):
-             if (node != i) and(node not in visited):
-                 edges.append((dist, i, node, graph.colors[i]))
-        minimum_spanning_tree = set()
-        edges.sort()
-    for edge in edges:
-        weight, vertice1, vertice2, color = edge
-        if find(vertice1) != find(vertice2):
-            union(vertice1, vertice2)
-            minimum_spanning_tree.add(edge)
-    return minimum_spanning_tree
+import sys
 
 def createPath(graph, start):
     #preprocess
@@ -77,7 +38,6 @@ def createPath(graph, start):
             path.insert(0, (v, graph.colors[v])) 
             inserted = True
         if inserted:
-            #print "path: ", path
             tmp = []
             for i, e in enumerate(graph.edges[path[-1][0]]):
                 if i not in visited:
@@ -90,25 +50,23 @@ def createPath(graph, start):
             stack = []
             for item in tmp:
               stack.append(item)
-            #print "stack: ", stack
     return path
 def solveTSP(graph, N, debug = False):
     opt_result = None
-    opt_length = 100000000
+    opt_length = sys.maxint
     for i in range(N):
         result_out = createPath(graph, i) 
         # cost
         length = util.getCost(graph, result_out)
-        if opt_length > length:
+        if opt_length > length and len(result_out) == N:
             opt_length = length
             opt_result = result_out  
+    if opt_result == None:
+        return opt_result
+    out = map(lambda x: x[0], opt_result)
     if debug:
         print "Number of nodes: %d" % N
-        print "Number of nodes in path: %d" % len(result_out)
+        print "Number of nodes in path: %d" % len(out)
         print "Cost: ", opt_length  
         print "Result: ", opt_result
-    out = map(lambda x: x[0], opt_result)
-    if len(out) != N:
-        return None
-    else:
-        return out
+    return out

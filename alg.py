@@ -17,5 +17,8 @@ if __name__ == "__main__":
       c = fin.readline()
 
       graph = util.Graph(N, d, c)
-      out = solveTSP(graph, N)
+      out = solveTSP(graph, N, True)
+      if out == None:
+          failed += 1
+      print "# Failed: ", failed
       print out
