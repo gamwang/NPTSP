@@ -93,38 +93,19 @@ def createPathMST(graph, edges):
           path.append((v, graph.colors[v]))
       for i in visited:
           tally.remove(i)
-      dump = []
       while len(tally) > 0:
-          m = tally.pop()
-          if graph.colors[m] == count[1]:
-              count = (count[0]+1,graph.colors[m])
-              if count[0] > 3:
-                  dump.append(m)
-                  continue
-          else:
-            count = (1, graph.colors[m])
-            while len(dump) >0:
-                tally.append(dump.pop())
-          path.append((m, graph.colors[m]))
-      while len(dump) > 0:
-          v = dump.pop()
-          best = sys.maxint
+          v = tally.pop()
+          bestdump = sys.maxint
           bestloc = len(path)+1
           for i in range(1,len(path)):
-            if (graph.colors[v] != path[i][1]and graph.colors[v] != path[i+1][1]):
+            if (graph.colors[v] != path[i][1] and graph.colors[v] != path[i+1][1]):
                 path.insert(i+1,(v,graph.colors[v]))
-                if calcLength(path) < best:
-                  best = calcLength(path)
+                if calcLength(path) < bestdump:
+                  bestdump = calcLength(path)
                   bestloc = i+1
                 path.remove((v,graph.colors[v]))
-            path.insert(bestloc,(v,graph.colors[v]))
-
-      length = 0
-      prev = -1
-      for x in range(len(path)):
-          if prev >= 0:
-              length += graph.edges[prev][path[x][0]]
-          prev = path[x][0]
+          path.insert(bestloc,(v,graph.colors[v]))
+      length = calcLength(path)
       if (length < bestlen):
         best = path
         bestlen = length
