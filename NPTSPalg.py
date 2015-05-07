@@ -108,10 +108,17 @@ def createPathMST(graph, edges):
           path.append((m, graph.colors[m]))
       while len(dump) > 0:
           v = dump.pop()
+          best = sys.maxint
+          bestloc = len(path)+1
           for i in range(1,len(path)):
             if (graph.colors[v] != path[i][1]and graph.colors[v] != path[i+1][1]):
                 path.insert(i+1,(v,graph.colors[v]))
-                break
+                if calcLength(path) < best:
+                  best = calcLength(path)
+                  bestloc = i+1
+                path.remove((v,graph.colors[v]))
+            path.insert(bestloc,(v,graph.colors[v]))
+
       length = 0
       prev = -1
       for x in range(len(path)):
@@ -125,26 +132,26 @@ def createPathMST(graph, edges):
 
 
 def createRandomPath(graph):
-  currCity = random.randint(0, graph.numCities - 1)
-  start = currCity
-  edges = []
-  notVisited = range(0, graph.numCities)
-  notVisited.remove(currCity)
-  color = graph.colors[currCity]
-  while len(edges) < graph.numCities - 1:
-      v = random.randint(0, len(notVisited) - 1)
-      nextEdge = notVisited[v]
-      if graph.colors[nextEdge] == color:
-          continue
-      else:
-          color = graph.colors[nextEdge]
-      if nextEdge in notVisited:
-          edges.append((currCity, nextEdge, graph.edges[currCity][nextEdge], graph.colors[currCity], graph.colors[nextEdge]))
-          currCity = nextEdge
-          notVisited.remove(currCity)
-  last = edges[graph.numCities - 2][1]
-  edges.append((last, start, graph.edges[start][last], graph.colors[last], graph.colors[start]))
-  return edges
+    currCity = random.randint(0, graph.numCities - 1)
+    start = currCity
+    edges = []
+    notVisited = range(0, graph.numCities)
+    notVisited.remove(currCity)
+    color = graph.colors[currCity]
+    while len(edges) < graph.numCities - 1:
+        v = random.randint(0, len(notVisited) - 1)
+        nextEdge = notVisited[v]
+        if graph.colors[nextEdge] == color:
+            continue
+        else:
+            color = graph.colors[nextEdge]
+        if nextEdge in notVisited:
+            edges.append((currCity, nextEdge, graph.edges[currCity][nextEdge], graph.colors[currCity], graph.colors[nextEdge]))
+            currCity = nextEdge
+            notVisited.remove(currCity)
+    last = edges[graph.numCities - 2][1]
+    edges.append((last, start, graph.edges[start][last], graph.colors[last], graph.colors[start]))
+    return edges
 
 def testRandom(graph, edges):
     visited = []
@@ -274,7 +281,6 @@ def localSearch2(graph, edges):
         edges.remove(nextEdge)
     return path, length
 
-
 def toColor(i):
     return graph.colors[i]
 
@@ -369,14 +375,14 @@ def calcLength(result):
       prev = result[x][0]
   return length
 
-def processCase(c, perm, d):
+def processCase(c, perm, d, name):
   # check it's valid
   v = [0] * N
   prev = 'X'
   count = 0
   for i in xrange(N):
     if v[perm[i]-1] == 1:
-      print "Your answer must be a permutation of {1,...,N}."
+      print name + " Your answer must be a permutation of {1,...,N}."
       return -1
     v[perm[i]-1] = 1
 
@@ -388,7 +394,7 @@ def processCase(c, perm, d):
       count = 1
 
     if count > 3:
-      print "Your tour cannot visit more than 3 same colored cities consecutively."
+      print name + " Your tour cannot visit more than 3 same colored cities consecutively."
       return -1
 
   cost = 0
@@ -402,8 +408,8 @@ def processCase(c, perm, d):
 
 if __name__ == "__main__":
     T = 495 # number of test cases
-    fout = open ("answer.out", "w")
-    for t in xrange(1, T+1):
+    fout = open ("answer1.out", "w")
+    for t in xrange(135, T+1):
         fin = open("instances/"+str(t) + ".in", "r")
         N = int(fin.readline())
         d = [[] for i in range(N)]
@@ -417,9 +423,9 @@ if __name__ == "__main__":
           result = findPath()
           result = createPath(result)
           sol = []
-          for i in range(len(resultMST)):
+          for i in range(len(result)):
             sol.append(result[i][0]+1)
-          l = processCase(c,sol,d)
+          l = processCase(c,sol,d, "bruteforce")
           for k in range(len(result)):
             fout.write("{0} ".format(str(sol[k])))
             if k == N -1:
@@ -433,25 +439,26 @@ if __name__ == "__main__":
           sol = []
           for i in range(len(resultMST)):
             sol.append(resultMST[i][0]+1)
-          lengthMST = processCase(c,sol,d)
-          resultLocal = createRandomPath(graph)
-          pathLocal, lengthLocal = localSearch2(graph, resultLocal)
-          lengthLocal = processCase(c,pathLocal,d)
-          if lengthLocal == -1 and lengthMST == -1:
-            fout.write("No solution lol oops\n")
-            continue
-          if lengthLocal == -1 or lengthMST < lengthLocal:
-            print "MST " + str(N) + " " + str(lengthMST)
-            print "Path: " + str(sol)
-            result = sol
-          elif lengthLocal != -1:
+          lengthMST = processCase(c,sol,d, "MST")
+          #resultLocal = createRandomPath(graph)
+          #pathLocal, lengthLocal = localSearch2(graph, resultLocal)
+          #lengthLocal = processCase(c,pathLocal,d, "Local")
+          #print "Local: " + str(pathLocal)
+          #if lengthLocal == -1 and lengthMST == -1:
+            #fout.write("No solution lol oops\n")
+            #continue
+          #if lengthLocal == -1 or lengthMST < lengthLocal:
+          print "MST " + str(N) + " " + str(lengthMST)
+          print "Path: " + str(sol)
+          result = sol
+          """elif lengthLocal != -1:
             result = pathLocal
             print "localSearch " + str(N) + " " + str(lengthLocal)
-            print "Path: " + str(pathLocal)
-          else:
-            print "ERROR, no solution?"
-            fout.write("no solutionnn!!! wrong\n")
-            continue
+            print "Path: " + str(pathLocal)"""
+          #else:
+            #print "ERROR, no solution?"
+            #fout.write("no solutionnn!!! wrong\n")
+            #continue
           for k in range(len(result)):
             fout.write("{0} ".format(str(result[k])))
             if k == N -1:
