@@ -155,7 +155,7 @@ def localSearch2(graph, edges):
 
 T = 1 # number of test cases
 #fout = open ("answer.out", "w")
-for t in xrange(58, 59):
+for t in xrange(4, 5):
     fin = open("instances/" + str(t) + ".in", "r")
     N = int(fin.readline())
     d = [[] for i in range(N)]
@@ -165,7 +165,8 @@ for t in xrange(58, 59):
 
     graph = util.Graph(N, d, c)
     
-    print "Running on " + str(N) + " node graph"
+    print "Running on " + str(t) + ".in"
+    print str(N) + " node graph"
     
     result = createRandomPath(graph)
     
@@ -177,6 +178,10 @@ for t in xrange(58, 59):
 #    if not checkPath(graph, edges):
 #        print 'color wrong'
 #        break
+
+    if len(set(edges)) != len(edges):
+        print "duplicates"
+        break
     
     print "Found path: "
     print edges
