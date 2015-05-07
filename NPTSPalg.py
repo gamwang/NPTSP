@@ -93,31 +93,19 @@ def createPathMST(graph, edges):
           path.append((v, graph.colors[v]))
       for i in visited:
           tally.remove(i)
-      dump = []
       while len(tally) > 0:
-          m = tally.pop()
-          if graph.colors[m] == count[1]:
-              count = (count[0]+1,graph.colors[m])
-              if count[0] > 3:
-                  dump.append(m)
-                  continue
-          else:
-            count = (1, graph.colors[m])
-            while len(dump) >0:
-                tally.append(dump.pop())
-          path.append((m, graph.colors[m]))
-      while len(dump) > 0:
-          v = dump.pop()
+          v = tally.pop()
+          bestdump = sys.maxint
+          bestloc = len(path)+1
           for i in range(1,len(path)):
-            if (graph.colors[v] != path[i][1]and graph.colors[v] != path[i+1][1]):
+            if (graph.colors[v] != path[i][1] and graph.colors[v] != path[i+1][1]):
                 path.insert(i+1,(v,graph.colors[v]))
-                break
-      length = 0
-      prev = -1
-      for x in range(len(path)):
-          if prev >= 0:
-              length += graph.edges[prev][path[x][0]]
-          prev = path[x][0]
+                if calcLength(path) < bestdump:
+                  bestdump = calcLength(path)
+                  bestloc = i+1
+                path.remove((v,graph.colors[v]))
+          path.insert(bestloc,(v,graph.colors[v]))
+      length = calcLength(path)
       if (length < bestlen):
         best = path
         bestlen = length
@@ -125,26 +113,26 @@ def createPathMST(graph, edges):
 
 
 def createRandomPath(graph):
-  currCity = random.randint(0, graph.numCities - 1)
-  start = currCity
-  edges = []
-  notVisited = range(0, graph.numCities)
-  notVisited.remove(currCity)
-  color = graph.colors[currCity]
-  while len(edges) < graph.numCities - 1:
-      v = random.randint(0, len(notVisited) - 1)
-      nextEdge = notVisited[v]
-      if graph.colors[nextEdge] == color:
-          continue
-      else:
-          color = graph.colors[nextEdge]
-      if nextEdge in notVisited:
-          edges.append((currCity, nextEdge, graph.edges[currCity][nextEdge], graph.colors[currCity], graph.colors[nextEdge]))
-          currCity = nextEdge
-          notVisited.remove(currCity)
-  last = edges[graph.numCities - 2][1]
-  edges.append((last, start, graph.edges[start][last], graph.colors[last], graph.colors[start]))
-  return edges
+    currCity = random.randint(0, graph.numCities - 1)
+    start = currCity
+    edges = []
+    notVisited = range(0, graph.numCities)
+    notVisited.remove(currCity)
+    color = graph.colors[currCity]
+    while len(edges) < graph.numCities - 1:
+        v = random.randint(0, len(notVisited) - 1)
+        nextEdge = notVisited[v]
+        if graph.colors[nextEdge] == color:
+            continue
+        else:
+            color = graph.colors[nextEdge]
+        if nextEdge in notVisited:
+            edges.append((currCity, nextEdge, graph.edges[currCity][nextEdge], graph.colors[currCity], graph.colors[nextEdge]))
+            currCity = nextEdge
+            notVisited.remove(currCity)
+    last = edges[graph.numCities - 2][1]
+    edges.append((last, start, graph.edges[start][last], graph.colors[last], graph.colors[start]))
+    return edges
 
 def testRandom(graph, edges):
     visited = []
@@ -273,7 +261,6 @@ def localSearch2(graph, edges):
         path.append(curr+1)
         edges.remove(nextEdge)
     return path, length
-
 
 def toColor(i):
     return graph.colors[i]
@@ -438,7 +425,7 @@ def solveTSP(graph, N, debug = False):
         print "Result: ", opt_result
     return out
 
-def processCase(c, perm, di, name):
+def processCase(c, perm, d, name):
   # check it's valid
   v = [0] * N
   prev = 'X'
@@ -497,7 +484,7 @@ if __name__ == "__main__":
           sol = []
           for i in range(len(result)):
             sol.append(result[i][0]+1)
-          l = processCase(c,sol,d,"brute force")
+          l = processCase(c,sol,d,"Brute force")
           for k in range(len(result)):
             fout.write("{0} ".format(str(sol[k])))
             if k == N -1:
