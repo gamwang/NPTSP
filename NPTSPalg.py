@@ -134,30 +134,14 @@ def createRandomPath(graph):
     edges.append((last, start, graph.edges[start][last], graph.colors[last], graph.colors[start]))
     return edges
 
-def testRandom(graph, edges):
-    visited = []
-    color = "a"
-    count = 0
-    for e in edges:
-        if e[0] in visited:
-            return False
-        else:
-            if color == graph.colors[e[0]] and count == 3:
-                return False
-            elif color == graph.colors[e[0]]:
-                count += 1
-            else:
-                count = 1
-                color = graph.colors[e[0]]
-            visited.append(e[0])
-    return True
-
-def checkPath(graph, edges):
+def checkPath(graph, edges):  
     temp = list(edges)
     curr = temp[0][0]
+    start = curr
     color = graph.colors[curr]
-    colorCities = [(curr, color)]
     count = 1
+    lap = 0
+    x = 0
     while len(temp) > 0:
         nextEdge = -1
         for e in temp:
@@ -168,21 +152,21 @@ def checkPath(graph, edges):
             return False
         elif nextEdge[0] == curr:
             curr = nextEdge[1]
-            temp.remove(nextEdge)
-        else:
+        elif nextEdge[1] == curr:
             curr = nextEdge[0]
+        if x < graph.numCities:
+            x += 1
+        else:
+            lap = 1
+        if lap == 1:
             temp.remove(nextEdge)
-
-        if color == graph.colors[curr] and count == 3:
+        if color == graph.colors[curr] and count >= 3:
             return False
         elif color == graph.colors[curr]:
-            colorCities.append((curr, color))
             count += 1
         else:
             color = graph.colors[curr]
-            colorCities = [(curr, color)]
             count = 1
-
     return True
 
 def switch2Edges(graph, edges, length):
@@ -202,7 +186,7 @@ def switch2Edges(graph, edges, length):
                 newList.append(newEdge1)
                 newList.remove(edge2)
                 newList.append(newEdge2)
-
+                
                 if not checkPath(graph, newList):
                     newList = list(edges)
                     newEdge1 = (edge1[0], edge2[0], graph.edges[edge1[0]][edge2[0]], graph.colors[edge1[0]], graph.colors[edge2[0]])
@@ -212,7 +196,7 @@ def switch2Edges(graph, edges, length):
                     newList.append(newEdge1)
                     newList.remove(edge2)
                     newList.append(newEdge2)
-
+                    
                     if not checkPath(graph, newList):
                         continue
                 newLength = sum([edge[2] for edge in newList])
@@ -238,15 +222,19 @@ def localSearch2(graph, edges):
             length = newLength
             count += 1
             x += 1
+    
+    if not checkPath(graph, newPath):
+        print "error in path edges line 108"
+    thing = list(edges)
     highest = 0
     edge = 0
     for e in edges:
-        if e[2] > highest:
+        if e[2] >= highest:
             highest = e[2]
             edge = e
     edges.remove(edge)
     length -= highest
-
+    
     curr = edge[0]
     path = [curr]
     while len(path) < graph.numCities:
@@ -258,9 +246,28 @@ def localSearch2(graph, edges):
             curr = e[1]
         else:
             curr = e[0]
-        path.append(curr+1)
+        path.append(curr)
         edges.remove(nextEdge)
-    return path, length
+    return path, length, thing
+
+def checkVertices(graph, path):
+    color = 'a'
+    count = 0
+    seen = []
+    for v in path:
+        if v in seen:
+            return False
+        else:
+            seen.append(v)
+        #print str(v) + ", color: " + str(graph.colors[v])
+        if color != graph.colors[v]:
+            color = graph.colors[v]
+            count = 1
+        elif color == graph.colors[v] and count == 3:
+            return False
+        elif color == graph.colors[v]:
+            count += 1
+    return True
 
 def toColor(i):
     return graph.colors[i]
@@ -417,7 +424,7 @@ def solveTSP(graph, N, debug = False):
             opt_result = result_out  
     if opt_result == None:
         return opt_result
-    out = map(lambda x: x[0], opt_result)
+    out = map(lambda x: x[0] + 1, opt_result)
     if debug:
         print "Number of nodes: %d" % N
         print "Number of nodes in path: %d" % len(out)
@@ -466,7 +473,7 @@ def genRandom(c, d):
 
 if __name__ == "__main__":
     T = 495 # number of test cases
-    fout = open ("answer1.out", "w")
+    fout = open ("answer2.out", "w")
     for t in xrange(1, T+1):
         fin = open("instances/"+str(t) + ".in", "r")
         N = int(fin.readline())
@@ -499,33 +506,48 @@ if __name__ == "__main__":
 
           #MST
           resultMST = MSTalg(graph)
-          resultMST = createPathMST(graph, resultMST)
-          sol = []
-          for i in range(len(resultMST)):
-            sol.append(resultMST[i][0]+1)
-          lengthMST = processCase(c,sol,d, "MST")
-
+          sol = createPathMST(graph, resultMST)
+          resultMST = []
+          for i in range(len(sol)):
+            resultMST.append(sol[i][0]+1)
+          lengthMST = processCase(c,resultMST,d, "MST")
+          
           #Greedy
           resultGreedy = solveTSP(graph, N)
           if resultGreedy == None:
-            lengthGreedy = -1
-          else:
-            lengthGreedy = processCase(c,resultGreedy,d, "Greedy")
+            resultGreedy = genRandom(c, d)
+          lengthGreedy = processCase(c,resultGreedy,d, "Greedy")
+          if lengthGreedy == -1:
+            resultGreedy = genRandom(c,d)
+            lengthGreedy = processCase(c, resultGreedy, d, "Greedy")
 
-          if lengthGreedy == -1 and lengthMST == -1:
-            print "Nothing works so GENERATING RANDOM YOLO"
-            result = resultRand
-          elif lengthGreedy == -1 or (lengthMST < lengthGreedy and 
-                                                    lengthMST < lengthRand):
+          #Local Search
+          initial = createRandomPath(graph)
+          sol, length, newPath = localSearch2(graph, initial)
+          resultLocal = []
+          for i in range(len(sol)):
+            resultLocal.append(sol[i]+1)
+          lengthLocal = processCase(c, resultLocal, d, "Local Search")
+          
+          if lengthLocal == -1:
+            resultLocal = genRandom(c,d)
+            lengthLocal = processCase(c, resultLocal, d, "Local Search")
+
+          bestScore = min(lengthMST, lengthGreedy, lengthLocal, lengthRand)
+          if bestScore == lengthLocal:
+            print ">>>>>>>>>>>>>>>> Local Search " + str(N) + " " + str(lengthLocal)
+            print "Path: " + str(resultLocal)
+            result = resultLocal
+          elif bestScore == lengthMST:
             print ">>>>>>>>>>>>>>>> MST " + str(N) + " " + str(lengthMST)
-            print "Path: " + str(sol)
-            result = sol
-          elif lengthGreedy != -1 and lengthGreedy < lengthRand:
+            print "Path: " + str(resultMST)
+            result = resultMST
+          elif bestScore == lengthGreedy:  
             result = resultGreedy
             print ">>>>>>>>>>>>>>>> Greedy " + str(N) + " " + str(lengthGreedy)
             print "Path: " + str(resultGreedy)
           else:
-            print ">>>>>>>>>>>>>>>> Random it is"
+            print "Nothing works so GENERATING RANDOM YOLO"
             result = resultRand
           for k in range(len(result)):
             fout.write("{0} ".format(str(result[k])))
